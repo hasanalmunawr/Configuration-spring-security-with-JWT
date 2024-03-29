@@ -23,7 +23,8 @@ public class AuthService {
     public AuthResponseDto getJwtTokensAfterAuthentication(Authentication authentication) {
         log.info("THE NAME OF USERNAME IS {} ",authentication.getName());
         try {
-            var userEntity = userRepository.findByEmailId(authentication.getName())
+
+            var userEntity = userRepository.findByUsername(authentication.getName())
                     .orElseThrow(() -> {
                         log.error("[AuthService:userSignInAuth] User : {} Not Found ", authentication.getName());
                         return new ResponseStatusException(HttpStatus.NOT_FOUND, "USER NOT FOUND");
