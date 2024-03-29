@@ -21,6 +21,7 @@ public class AuthService {
     private final JwtTokenGenerator jwtTokenGenerator;
 
     public AuthResponseDto getJwtTokensAfterAuthentication(Authentication authentication) {
+        log.info("THE NAME OF USERNAME IS {} ",authentication.getName());
         try {
             var userEntity = userRepository.findByEmailId(authentication.getName())
                     .orElseThrow(() -> {

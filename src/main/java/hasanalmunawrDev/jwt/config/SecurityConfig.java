@@ -9,6 +9,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.oauth2.sdk.token.BearerTokenError;
 import hasanalmunawrDev.jwt.config.jwt.JwtAccessTokenFilter;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -36,13 +37,12 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableMethodSecurity
 @Configuration
 @Slf4j
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Autowired
-    private UserManagerConfig userManagerConfig;
+    private final UserManagerConfig userManagerConfig;
 
-    @Autowired
-    private RSAKeyRecord rsaKeyRecord;
+    private final RSAKeyRecord rsaKeyRecord;
 
 
     @Order(1)
@@ -69,17 +69,47 @@ public class SecurityConfig {
                 .securityMatcher(new AntPathRequestMatcher("/api/**"))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-//                .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .addFilterBefore(new JwtAccessTokenFilter(rsaKeyRecord, jwtTokenUtils), UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(ex -> {
-                    log.error("[SecurityConfig:apiSecurityFilterChain] Exception due to :{}",ex);
-                    ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
-                    ex.accessDeniedHandler(new BearerTokenAccessDeniedHandler());
-                })
+                .userDetailsService(userManagerConfig)
+                .formLogin(withDefaults())
                 .httpBasic(withDefaults())
                 .build();
     }
+
+//    @Order(1)
+//    @Bean
+//    public SecurityFilterChain signInSecurityFilterChain(HttpSecurity httpSecurity) throws Exception{
+//        return httpSecurity
+//                .securityMatcher(new AntPathRequestMatcher("/sign-in/**"))
+//                .csrf(AbstractHttpConfigurer::disable)
+//                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+//                .userDetailsService(userManagerConfig)
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .exceptionHandling(ex -> {
+//                    ex.authenticationEntryPoint((request, response, authException) ->
+//                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage()));
+//                })
+//                .httpBasic(withDefaults())
+//                .build();
+//    }
+
+//    @Order(2)
+//    @Bean
+//    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity httpSecurity) throws Exception{
+//        return httpSecurity
+//                .securityMatcher(new AntPathRequestMatcher("/api/**"))
+//                .csrf(AbstractHttpConfigurer::disable)
+//                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+//                .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+////                .addFilterBefore(new JwtAccessTokenFilter(rsaKeyRecord, jwtTokenUtils), UsernamePasswordAuthenticationFilter.class)
+//                .exceptionHandling(ex -> {
+//                    log.error("[SecurityConfig:apiSecurityFilterChain] Exception due to :{}",ex);
+//                    ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
+//                    ex.accessDeniedHandler(new BearerTokenAccessDeniedHandler());
+//                })
+//                .httpBasic(withDefaults())
+//                .build();
+//    }
 
 
     @Bean
