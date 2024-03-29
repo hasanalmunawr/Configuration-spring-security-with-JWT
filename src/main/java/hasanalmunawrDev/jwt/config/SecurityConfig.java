@@ -51,7 +51,7 @@ public class SecurityConfig {
         return httpSecurity
                 .securityMatcher(new AntPathRequestMatcher("/sign-in/**"))
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth.anyRequest().anonymous())
                 .userDetailsService(userManagerConfig)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> {
@@ -68,7 +68,7 @@ public class SecurityConfig {
         return httpSecurity
                 .securityMatcher(new AntPathRequestMatcher("/api/**"))
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .userDetailsService(userManagerConfig)
                 .formLogin(withDefaults())
                 .httpBasic(withDefaults())
