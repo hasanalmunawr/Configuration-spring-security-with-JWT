@@ -24,19 +24,19 @@ public class InitialUserInfo implements CommandLineRunner {
         UserEntity manager = new UserEntity();
         manager.setUsername("Manager");
         manager.setPassword(passwordEncoder.encode("password"));
-        manager.setRoles(Role.MANAGER.getName());
+        manager.setRoles("ROLE_MANAGER");
         manager.setEmailId("manager@manager.com");
 
         UserEntity admin = new UserEntity();
         admin.setUsername("Admin");
         admin.setPassword(passwordEncoder.encode("password"));
-        admin.setRoles(Role.ADMIN.getName());
+        admin.setRoles("ROLE_ADMIN");
         admin.setEmailId("admin@admin.com");
 
         UserEntity user = new UserEntity();
         user.setUsername("User");
         user.setPassword(passwordEncoder.encode("password"));
-        user.setRoles(Role.USER.getName());
+        user.setRoles("ROLE_USER");
         user.setEmailId("user@user.com");
 
         userRepository.saveAll(List.of(admin, manager, user));

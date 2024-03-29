@@ -17,16 +17,15 @@ public class UserConfig implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Access the single Role directly:
-//        String role = userEntity.getRoles();
-//        // Map it to a GrantedAuthority:
-//        return Collections.singletonList(new SimpleGrantedAuthority(role));
-        return Arrays
-                .stream(userEntity
-                        .getRoles()
-                        .split(","))
-                .map(SimpleGrantedAuthority::new)
-                .toList();
+        String role = userEntity.getRoles();
+        // Map it to a GrantedAuthority:
+        return Collections.singletonList(new SimpleGrantedAuthority(role));
+//        return Arrays
+//                .stream(userEntity
+//                        .getRoles()
+//                        .split(","))
+//                .map(SimpleGrantedAuthority::new)
+//                .toList();
     }
 
     @Override
