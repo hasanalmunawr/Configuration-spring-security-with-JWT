@@ -23,6 +23,8 @@ public class RefreshTokenEntity {
 
     private boolean revoked;
 
+    private boolean isExpired;
+
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "username")
     private UserEntity userEntity;

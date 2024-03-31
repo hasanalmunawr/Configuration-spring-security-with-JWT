@@ -1,6 +1,8 @@
 package hasanalmunawrDev.jwt.service;
 
+import hasanalmunawrDev.jwt.config.userConfig.UserInfoMapper;
 import hasanalmunawrDev.jwt.dto.AuthResponseDto;
+import hasanalmunawrDev.jwt.dto.UserRegrestationDto;
 import hasanalmunawrDev.jwt.entity.RefreshTokenEntity;
 import hasanalmunawrDev.jwt.entity.TokenType;
 import hasanalmunawrDev.jwt.config.jwt.JwtTokenGenerator;
@@ -15,11 +17,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
@@ -33,12 +37,15 @@ public class AuthService {
 
     private final JwtTokenGenerator jwtTokenGenerator;
 
+    private final UserInfoMapper userInfoMapper;
+
     public AuthResponseDto getJwtTokensAfterAuthentication(Authentication authentication,
                                                            HttpServletResponse response) {
         log.info("THE NAME OF USERNAME IS {} ",authentication.getName());
         try {
 
-            var userEntity = userRepository.findByUsername(authentication.getName())
+            var userEntity = userRepository
+                    .findByUsername(authentication.getName())
                     .orElseThrow(() -> {
                         log.error("[AuthService:userSignInAuth] User : {} Not Found ", authentication.getName());
                         return new ResponseStatusException(HttpStatus.NOT_FOUND, "USER NOT FOUND");
@@ -70,7 +77,8 @@ public class AuthService {
 
         final String refreshToken = authorizationHeader.substring(7);
 
-        var refreshTokenEntity = refreshTokenRepository.findByRefreshToken(refreshToken)
+        var refreshTokenEntity = refreshTokenRepository
+                .findByRefreshToken(refreshToken)
                 .filter(tokens -> !tokens.isRevoked())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh Token REVOKED"));
 
@@ -86,6 +94,43 @@ public class AuthService {
                 .username(userEntity.getUsername())
                 .tokenType(TokenType.Bearer)
                 .build();
+    }
+
+    public AuthResponseDto registerUser(UserRegrestationDto regrestationDto, HttpServletResponse response) {
+        try {
+            log.info("[AuthService:registerUser] User Registration started with :: {}", regrestationDto.username());
+
+            Optional<UserEntity> existUser = userRepository
+                    .findByEmailId(regrestationDto.email());
+
+            if (existUser.isPresent()) {
+                throw new Exception("User Already Exist");
+            }
+
+            UserEntity user = userInfoMapper.convertToEntity(regrestationDto);
+            Authentication authenticationObject = createAuthenticationObject(user);
+
+            // Generate a JWT token
+            String accessToken = jwtTokenGenerator.generateAccessToken(authenticationObject);
+            String refreshToken = jwtTokenGenerator.generateRefreshToken(authenticationObject);
+
+            UserEntity saveUser = userRepository.save(user);
+            saveUserRefreshToken(user, refreshToken);
+
+            createRefreshTokenCookie(response, refreshToken);
+
+            log.info("[AuthService:registerUser] User : {} Successfully registered", saveUser);
+            return AuthResponseDto.builder()
+                    .accessToken(accessToken)
+                    .accessTokenExpiry(5 * 60)
+                    .username(saveUser.getUsername())
+                    .tokenType(TokenType.Bearer)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("[AuthService:registerUser]Exception while registering the user due to :"+e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
 

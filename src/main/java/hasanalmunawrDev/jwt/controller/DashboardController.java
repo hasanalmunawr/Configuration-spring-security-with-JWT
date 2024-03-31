@@ -38,7 +38,8 @@ public class DashboardController {
 //    @PreAuthorize("hasAuthority('SCOPE_READ')")
     @GetMapping("/welcome-message")
     public ResponseEntity<String> getFirstWelcomeMessage(Authentication authentication) {
-        return ResponseEntity.ok("Welcome to the JWT Tutorial:" + authentication.getName() + "with scope:" + authentication.getAuthorities());
+        return ResponseEntity
+                .ok("Welcome to the JWT Tutorial:" + authentication.getName() + "with scope:" + authentication.getAuthorities());
     }
 
     //        @PreAuthorize("hasRole('ROLE_MANAGER')")
@@ -56,7 +57,8 @@ public class DashboardController {
             @RequestParam(value = "message") String message,
             Principal principal) {
         log.info("[DasboardCOntroller:getAdmin] name of :: {}", principal.getName());
-        return ResponseEntity.ok("Admin::" + principal.getName() + " has this message: " + message );
+        return ResponseEntity
+                .ok("Admin::" + principal.getName() + " has this message: " + message );
     }
 
 }

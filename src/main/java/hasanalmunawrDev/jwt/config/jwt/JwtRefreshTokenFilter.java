@@ -37,7 +37,9 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
         try {
             log.info("[JwtRefreshTokenFilter:doFilterInternal] :: Started");
 
@@ -45,7 +47,8 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter
 
             final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-            JwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey(rsaKeyRecord.rsaPublicKey()).build();
+            JwtDecoder jwtDecoder = NimbusJwtDecoder
+                    .withPublicKey(rsaKeyRecord.rsaPublicKey()).build();
 
             if (!authHeader.startsWith("Bearer ")) {
                 filterChain.doFilter(request, response);
@@ -59,7 +62,8 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter
 
             if (!username.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
                 // check if refreshToken isPresent in databse and valid
-                var isRefreshTokenValisInDatabase = refreshTokenRepository.findByRefreshToken(jwtRefreshToken.getTokenValue())
+                var isRefreshTokenValisInDatabase = refreshTokenRepository
+                        .findByRefreshToken(jwtRefreshToken.getTokenValue())
                         .map(refreshTokenEntity -> !refreshTokenEntity.isRevoked())
                         .orElse(false);
 
