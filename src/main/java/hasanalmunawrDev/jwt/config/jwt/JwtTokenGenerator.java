@@ -23,6 +23,20 @@ public class JwtTokenGenerator {
 
     private final JwtEncoder jwtEncoder;
 
+    public String generateRefreshToken(Authentication authentication) {
+        log.info("[JwtTokenGenerator:generateRefreshToken] Token Creation started fro : {}", authentication.getName());
+
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuer("hasan")
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plus(15, ChronoUnit.MINUTES))
+                .subject(authentication.getName())
+                .claim("scope", "REFRESH_TOKEN")
+                .build();
+
+        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+    }
+
     public String generateAccessToken(Authentication authentication) {
         log.info("[JwtTokenGenerator:generateAccessToken] Token Creation Started for : {} ", authentication.getName());
 
@@ -33,12 +47,14 @@ public class JwtTokenGenerator {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("hasan")
                 .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plus(15, ChronoUnit.MINUTES))
+                .expiresAt(Instant.now().plus(1, ChronoUnit.MINUTES))
                 .subject(authentication.getName())
                 .claim("scope", permissions)
                 .build();
 
-        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+        return jwtEncoder
+                .encode(JwtEncoderParameters.from(claims))
+                .getTokenValue();
     }
 
     private String getPermissionsFromRoles(String role) {
@@ -57,7 +73,9 @@ public class JwtTokenGenerator {
     }
 
     private String getRolesOfUser(Authentication authentication) {
-        return authentication.getAuthorities().stream()
+        return authentication
+                .getAuthorities()
+                .stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(" "));
     }

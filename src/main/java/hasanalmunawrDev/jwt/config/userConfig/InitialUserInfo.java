@@ -1,6 +1,5 @@
 package hasanalmunawrDev.jwt.config.userConfig;
 
-import hasanalmunawrDev.jwt.entity.Role;
 import hasanalmunawrDev.jwt.entity.UserEntity;
 import hasanalmunawrDev.jwt.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
